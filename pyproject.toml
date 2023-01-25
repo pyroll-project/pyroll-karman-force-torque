@@ -1,0 +1,29 @@
+[project]
+name = "pyroll-alexander-power-and-labour"
+description = "Plugin for PyRoll providing the power and labour model according to Alexander."
+authors = [
+    { name = "Christoph Renzing", email = "christoph.renzing@imf.tu-freiberg.de" }
+]
+license = "BSD-3-Clause"
+homepage = "https://pyroll-project.github.io/"
+repository = "https://github.com/pyroll-project/pyroll-alexander-power-and-labour"
+documentation = "https://github.com/pyroll-project/pyroll-alexander-power-and-labour/blob/main/docs/docs.pdf"
+packages = [
+    { include = "pyroll/alexander_power_and_labour" }
+]
+readme = "README.md"
+classifiers = [
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Manufacturing",
+    "Operating System :: OS Independent",
+    "Topic :: Scientific/Engineering"
+]
+
+requires-python = ">=3.9, <4.0"
+dependencies = ["pyroll-core ~= 2.0.0b"]
+
+dynamic = ["version"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

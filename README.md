@@ -1,2 +1,2 @@
 # pyroll-alexander-power-and-labour
-PyRolL Plugin for calculation of power and labour accoring to Alexanders model.
+PyRolL Plugin for calculation of power and labour according to Alexanders model.
