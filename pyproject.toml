@@ -20,7 +20,10 @@ classifiers = [
 ]
 
 requires-python = ">=3.9, <4.0"
-dependencies = ["pyroll-core ~= 2.0.0b"]
+dependencies = [
+    "pyroll-core ~= 2.0.0b",
+    "pyroll-freiberg-flow-stress ~= 2.0.0a"
+]
 
 dynamic = ["version"]
 
