@@ -1,6 +1,6 @@
 [project]
-name = "pyroll-alexander-power-and-labour"
-description = "Plugin for PyRoll providing the power and labour model according to Alexander."
+name = "pyroll-karman-power-and-labour"
+description = "Plugin for PyRoll providing the power and labour model solving the von-Karman equation."
 authors = [
     { name = "Christoph Renzing", email = "christoph.renzing@imf.tu-freiberg.de" }
 ]
@@ -22,7 +22,8 @@ classifiers = [
 requires-python = ">=3.9, <4.0"
 dependencies = [
     "pyroll-core ~= 2.0.0b",
-    "pyroll-freiberg-flow-stress ~= 2.0.0a"
+    "pyroll-freiberg-flow-stress ~= 2.0.0a",
+    "pandas ~=1.5.3"
 ]
 
 dynamic = ["version"]
