@@ -4,7 +4,7 @@ packages = [
 ]
 
 [version]
-path = "pyroll/alexander_power_and_labour/__init__.py"
+path = "pyroll/karman_power_and_labour/__init__.py"
 
 [envs.default]
 path = ".venv"
