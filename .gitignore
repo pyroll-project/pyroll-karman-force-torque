@@ -132,3 +132,13 @@ dmypy.json
 /.idea/misc.xml
 /.idea/pyroll-interstand-tension.iml
 /.idea/vcs.xml
+/docs/docs.aux
+/docs/docs.bbl
+/docs/docs.bcf
+/docs/docs.blg
+/docs/docs.fdb_latexmk
+/docs/docs.fls
+/docs/docs.out
+/docs/docs.run.xml
+/docs/docs.synctex.gz
+/.idea/pyroll-karman-power-and-labour.iml
