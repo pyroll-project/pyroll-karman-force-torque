@@ -46,4 +46,4 @@ def mean_neutral_plane_position(self: RollPass):
 @RollPass.Roll.roll_torque
 def roll_torque(self: RollPass.Roll):
     return (
-                self.roll_pass.karman_solution.roll_torque_per_unit_width * self.roll_pass.contact_area) / self.contact_length
+            self.roll_pass.karman_solution.roll_torque_per_unit_width * self.roll_pass.contact_area) / self.contact_length

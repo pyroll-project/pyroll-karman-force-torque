@@ -11,19 +11,67 @@
 % Document
 \begin{document}
 
-    \title{Interstand tension PyRoll Plugin}
+    \title{Karman Power and Labour PyRolL Plugin}
     \author{Christoph Renzing}
     \date{\today}
 
     \maketitle
 
+    The PyRolL plugin pyroll-karman-power-and-labour calculates the roll-force and roll-torque as well as the mean neutral plane location for a roll-pass.
+    Since von-Karman originally developed the strip or slap theory for flat rolling, the grooved pass is not considered directly.
+    The solution is therefore derived for an equivalent flat pass, which makes the plugin's accuracy heavily depended on the equivalent flat pass plugins.
+    In the following sections the main model approach and usage are explained in further detail.
+
 
     \section{Model approach}\label{sec:model-approach}
 
+    The current model is based on the classic elementary theory of plasticity, which is a well known approach of modelling the stress distributions in flat rolling.
+    The elementary theory of plasticity for flat rolling is also known as strip or slap theory, because the roll gap is divided in rolling direction in infinitesimal narrow strips, as shown in \autoref{fig:elementary-stripe}, on which the force balance is built.
+    In thickness direction the strip's height is equal the local height of the roll gap.
+    The deformation of each strip is always plane and parallelepidic.
+    The strip's material properties are constant in thickness direction and may vary in rolling direction.
+    Therefore, the vertical stress is constant in thickness direction and no shear deformation can be considered.
+
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.5\linewidth]{img/strip-hom}
+        \caption{Stripe element of elementary theory of plasticity}
+        \label{fig:elementary-stripe}
+    \end{figure}
+
+    The roll surface is commonly described as a circular arc, if elastic roll deformations are neglected.
+    So the roll gap height can be described by \autoref{eq:roll-gap}.
+    The rolls are here considered to be rigid, but in general implementing consideration of elastic roll and rolling stand behavior is possible.
+    Also, the rolls are considered to be symmetric, meaning of equal radius $R_W$ and rotational frequency $n_W$.
+
+    \begin{equation}
+        h(x) = s + 2 * \left( R_W - \sqrt{R_W^2 - x^2} \right)
+        \label{eq:roll-gap}
+    \end{equation}
+
+    The model needs additional approaches for the yield stress, and the friction between rolls and workpiece.
+    The shear stress resulting from friction between the material and the roll surface is model by Coulomb's friction law.
+    Since normally this model is used for cold rolling with lubricates, the friction coefficient $\mu$ has to be sufficiently high.
+    The force balance at the stripe element leads to the well known Karmàn differential equation~\cite{Karman1925, Alexander1972} as shown in \autoref{eq:karman-elem}, which is an ordinary differential equation for the horizontal stress $\sigma_x$ in $x$ and can be solved easily by numerical methods.
+    A suitable yield criterion gives the connection between $\sigma_x$ and $\sigma_y$.
+    In this approach the yield criterion according to von-Mises was chosen~\cite{Mises1913, Mises1928}.
+
+    \begin{gather}
+        0 = \sigma_x, \frac{\mathrm{d}h}{\mathrm{d}x} + h\, \frac{\mathrm{d}\sigma_x}{\mathrm{d}x} + 2 \tau_R - 2 p_N \tan(\alpha)\\
+        p_N = -\sigma_y - \tau_R \tan(\alpha)\\
+        \tau = \mu p_N
+        \label{eq:karman-elem}
+    \end{gather}
+
 
     \section{Usage instructions}\label{sec:usage-instructions}
+    The plugin can be loaded under the name \texttt{pyroll\_karman\_power\_and\_labour}.
 
+    An implementation of the \lstinline{roll_force} and \lstinline{mean_neutral_plane_position} hook on \lstinline{RollPass} is provided.
+    Furthermore, an implementation of the \lstinline{roll_torque} hook on \lstinline{RollPass.Roll} is provided.
 
+    Additionally, hooks on \lstinline{RollPass} are defined, which are used in the calculation, as listed in \autoref{tab:hookspecs}.
+    The hooks \lstinline{mean_front_tension}, \lstinline{mean_back_tension} and \lstinline{coulomb_friction_coefficient} have to set and adjusted individually.
 
     \begin{table}
         \centering
@@ -31,8 +79,13 @@
         \label{tab:hookspecs}
         \begin{tabular}{ll}
             \toprule
-            Hook name & Meaning \\
+            Hook name                               & Meaning                                                \\
             \midrule
+            \texttt{coulomb\_friction\_coefficient} & Coulomb's friction coefficient $\mu$                   \\
+            \texttt{mean\_back\_tension}            & Mean back tension of the roll pass $\sigma_{x,0}$      \\
+            \texttt{mean\_front\_tension}           & Mean front tension of the roll pass $\sigma_{x,1}$     \\
+            \texttt{mean\_neutral\_plane\_position} & Mean neutral plane postion $x_N$                       \\
+            \texttt{karman\_solution}               & KarmanSolver object with solution values as attributes \\
             \bottomrule
         \end{tabular}
     \end{table}
