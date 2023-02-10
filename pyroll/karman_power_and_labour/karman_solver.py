@@ -1,4 +1,5 @@
 import logging
+
 import numpy as np
 import pandas as pd
 import scipy.interpolate as inter
@@ -15,38 +16,34 @@ class KarmanSolver:
     def __init__(self, roll_pass: RollPass):
         self.roll_pass = roll_pass
         self.slab_element_count = 100
+        self.entry_position = -self.roll_pass.roll.contact_length
+        self.exit_position = 0
         self.step_width = self.roll_pass.roll.contact_length / self.slab_element_count
-        self.roll_gap_coordinates = np.arange(-self.roll_pass.entry_position, self.roll_pass.exit_position,
-                                              self.step_width)
+        self.roll_gap_coordinates = np.arange(self.entry_position, self.exit_position, self.step_width)
         self.forward_solution = self.solve(solution_direction="forward")
         self.backward_solution = self.solve(solution_direction="backward")
 
         self.horizontal_stress_forward_interpolation = inter.interp1d(self.forward_solution.index,
                                                                       self.forward_solution["horizontal_stress"],
                                                                       fill_value="extrapolate")
+
         self.horizontal_stress_backward_interpolation = inter.interp1d(self.backward_solution.index,
                                                                        self.backward_solution["horizontal_stress"],
                                                                        fill_value="extrapolate")
 
-        self.neutral_plane_position = opt.brentq(lambda position:
-                                                 self.horizontal_stress_backward_interpolation(position)
-                                                 - self.horizontal_stress_forward_interpolation(position),
-                                                 - self.roll_pass.roll.contact_length, 0)
-
+        self.neutral_plane_position = self.find_neutral_plane()
         self.neutral_plane_velocity = 2 * np.pi * self.roll_pass.roll.rotational_frequency * self.roll_pass.roll.working_radius * np.cos(
             self.roll_angle(self.neutral_plane_position))
 
-        self.solution = pd.concat(
-            [self.forward_solution[-self.roll_pass.roll.contact_length: self.neutral_plane_position],
-             self.backward_solution[0: self.neutral_plane_position]]).sort_index()
-        self.vertical_stress = inter.interp1d(self.solution.index, self.solution["vertical_stress"],
-                                              fill_value="extrapolate")
-        self.shear_stress = inter.interp1d(self.solution.index, self.solution["shear_stress"],
-                                           fill_value="extrapolate")
+        self.solution = self.generate_solution()
+        self.vertical_stress_interpolation = inter.interp1d(self.solution.index, self.solution["vertical_stress"],
+                                                            fill_value="extrapolate")
+        self.shear_stress_interpolation = inter.interp1d(self.solution.index, self.solution["shear_stress"],
+                                                         fill_value="extrapolate")
         self.roll_force_per_unit_width = self.return_roll_force_per_unit_width()
         self.roll_torque_per_unit_width = self.return_roll_torque_per_unit_width()
-        self.entry_velocity = self.material_velocity(self.roll_pass.entry_position)
-        self.exit_velocity = self.material_velocity(self.roll_pass.exit_position)
+        self.entry_velocity = self.material_velocity(self.entry_position)
+        self.exit_velocity = self.material_velocity(self.exit_position)
 
     def equivalent_roll_gap_height(self, roll_gap_coordinate):
         return self.roll_pass.gap + 2 * (self.roll_pass.roll.working_radius - np.sqrt(
@@ -108,9 +105,28 @@ class KarmanSolver:
         return pd.DataFrame.from_dict(solution_storage, orient="index")
 
     def return_roll_force_per_unit_width(self):
-        integral = -quad(lambda position: self.vertical_stress(position), -self.roll_pass.roll.contact_length, 0)[0]
+        integral = - \
+            quad(lambda position: self.vertical_stress_interpolation(position), -self.roll_pass.roll.contact_length, 0)[
+                0]
         return integral
 
     def return_roll_torque_per_unit_width(self):
-        integral = quad(lambda position: self.shear_stress(position), -self.roll_pass.roll.contact_length, 0)[0]
+        integral = \
+            quad(lambda position: self.shear_stress_interpolation(position), -self.roll_pass.roll.contact_length, 0)[0]
         return integral
+
+    def generate_solution(self):
+        return pd.concat([self.forward_solution[-self.roll_pass.roll.contact_length: self.neutral_plane_position],
+                          self.backward_solution[0: self.neutral_plane_position]]).sort_index()
+
+    def find_neutral_plane(self):
+
+        (pos, result) = opt.brentq(lambda position:
+                                   self.horizontal_stress_backward_interpolation(position)
+                                   - self.horizontal_stress_forward_interpolation(position),
+                                   - self.roll_pass.roll.contact_length, 0, full_output=True)
+
+        if result.converged is True:
+            return pos
+
+        raise RuntimeError("Could not find neutral plane position!")
