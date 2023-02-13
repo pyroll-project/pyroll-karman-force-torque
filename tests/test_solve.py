@@ -16,9 +16,6 @@ def test_solve(tmp_path: Path, caplog):
         temperature=1200 + 273.15,
         strain=0,
         material=["C45", "steel"],
-        flow_stress=100e6,
-        density=7.5e3,
-        thermal_capacity=690,
     )
 
     sequence = PassSequence([
@@ -34,9 +31,10 @@ def test_solve(tmp_path: Path, caplog):
                 rotational_frequency=1
             ),
             gap=2e-3,
-            coulomb_friction_coefficient=0.4,
-            mean_front_tension=0,
+            coulomb_friction_coefficient=0.25,
             mean_back_tension=0,
+            mean_front_tension=5e6,
+
         ),
         Transport(
             label="I => II",
@@ -54,9 +52,10 @@ def test_solve(tmp_path: Path, caplog):
                 rotational_frequency=1
             ),
             gap=2e-3,
-            coulomb_friction_coefficient=0.4,
+            coulomb_friction_coefficient=0.25,
+            mean_back_tension=5e6,
             mean_front_tension=0,
-            mean_back_tension=0,
+
         ),
     ])
 

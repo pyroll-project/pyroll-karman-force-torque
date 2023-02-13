@@ -15,11 +15,10 @@ class KarmanSolver:
 
     def __init__(self, roll_pass: RollPass):
         self.roll_pass = roll_pass
-        self.slab_element_count = 100
+        self.slab_element_count = 125
         self.entry_position = -self.roll_pass.roll.contact_length
         self.exit_position = 0
         self.step_width = self.roll_pass.roll.contact_length / self.slab_element_count
-        self.roll_gap_coordinates = np.arange(self.entry_position, self.exit_position, self.step_width)
         self.forward_solution = self.solve(solution_direction="forward")
         self.backward_solution = self.solve(solution_direction="backward")
 
@@ -32,9 +31,9 @@ class KarmanSolver:
                                                                        fill_value="extrapolate")
 
         self.neutral_plane_position = self.find_neutral_plane()
+        self.neutral_plane_angle = self.roll_angle(self.neutral_plane_position)
         self.neutral_plane_velocity = 2 * np.pi * self.roll_pass.roll.rotational_frequency * self.roll_pass.roll.working_radius * np.cos(
-            self.roll_angle(self.neutral_plane_position))
-
+            self.neutral_plane_angle)
         self.solution = self.generate_solution()
         self.vertical_stress_interpolation = inter.interp1d(self.solution.index, self.solution["vertical_stress"],
                                                             fill_value="extrapolate")
@@ -62,69 +61,71 @@ class KarmanSolver:
 
     def solve(self, solution_direction: str):
         log = logging.getLogger(__name__)
-        if solution_direction == "forward":
-            start_position = -self.roll_pass.roll.contact_length
-            exit_position = 0
+
+        if solution_direction is "forward":
+            start_position = self.entry_position
+            exit_position = self.exit_position
             horizontal_stress = self.roll_pass.mean_back_tension
             direction = 1
-        else:
-            start_position = 0
-            exit_position = -self.roll_pass.roll.contact_length
+        elif solution_direction is "backward":
+            start_position = self.exit_position
+            exit_position = self.entry_position
             horizontal_stress = self.roll_pass.mean_front_tension
             direction = -1
 
         position = start_position
         step_width_with_direction = self.step_width * direction
-        solution_storage = {}
+        stepwise_solution_storage = {}
 
         while position < exit_position if direction > 0 else position > exit_position:
             height_derivate = derivative(self.equivalent_roll_gap_height, position, dx=1e-8)
-            roll_angle = -np.arcsin(position / self.roll_pass.roll.working_radius)
+            roll_angle = self.roll_angle(position)
             equivalent_strain = self.equivalent_local_strain(position)
             flow_stress = self.roll_pass.in_profile.flow_stress_function(strain=equivalent_strain,
                                                                          strain_rate=self.roll_pass.strain_rate,
                                                                          temperature=self.roll_pass.in_profile.temperature)
             vertical_stress = horizontal_stress - 2 / np.sqrt(3) * flow_stress
             normal_pressure = - vertical_stress / (
-                    1 + self.roll_pass.coulomb_friction_coefficient * np.tan(roll_angle) * direction)
+                        1 + self.roll_pass.coulomb_friction_coefficient * np.tan(roll_angle) * direction)
+
             shear_stress = self.roll_pass.coulomb_friction_coefficient * normal_pressure * direction
 
-            solution_storage[position] = (
-                {"horizontal_stress": horizontal_stress, "vertical_stress": vertical_stress,
-                 "shear_stress": shear_stress,
-                 "normal_pressure": normal_pressure, "flow_stress": flow_stress})
+            stepwise_solution_storage[position] = (
+            {"horizontal_stress": horizontal_stress, "vertical_stress": vertical_stress, "shear_stress": shear_stress,
+             "normal_pressure": normal_pressure, "flow_stress": flow_stress})
 
             horizontal_stress_change = - (
-                    horizontal_stress * height_derivate + 2 * shear_stress - 2 * normal_pressure * np.tan(
-                roll_angle)) / self.equivalent_roll_gap_height(
-                position)
+                        horizontal_stress * height_derivate + 2 * shear_stress - 2 * normal_pressure * np.tan(
+                    roll_angle)) / self.equivalent_roll_gap_height(position)
             horizontal_stress += horizontal_stress_change * step_width_with_direction
             position += step_width_with_direction
 
         log.debug(f"Finished solution of von-Karman ODE.")
-        return pd.DataFrame.from_dict(solution_storage, orient="index")
+        return pd.DataFrame.from_dict(stepwise_solution_storage, orient="index")
 
     def return_roll_force_per_unit_width(self):
         integral = - \
-            quad(lambda position: self.vertical_stress_interpolation(position), -self.roll_pass.roll.contact_length, 0)[
+            quad(lambda position: self.vertical_stress_interpolation(position), self.entry_position,
+                 self.exit_position)[
                 0]
         return integral
 
     def return_roll_torque_per_unit_width(self):
         integral = \
-            quad(lambda position: self.shear_stress_interpolation(position), -self.roll_pass.roll.contact_length, 0)[0]
+            quad(lambda position: self.shear_stress_interpolation(position), self.entry_position, self.exit_position)[
+                0]
         return integral
 
     def generate_solution(self):
-        return pd.concat([self.forward_solution[-self.roll_pass.roll.contact_length: self.neutral_plane_position],
-                          self.backward_solution[0: self.neutral_plane_position]]).sort_index()
+        return pd.concat([self.forward_solution[self.entry_position: self.neutral_plane_position],
+                          self.backward_solution[self.exit_position: self.neutral_plane_position]]).sort_index()
 
     def find_neutral_plane(self):
 
         (pos, result) = opt.brentq(lambda position:
                                    self.horizontal_stress_backward_interpolation(position)
                                    - self.horizontal_stress_forward_interpolation(position),
-                                   - self.roll_pass.roll.contact_length, 0, full_output=True)
+                                   self.entry_position, self.exit_position, full_output=True)
 
         if result.converged is True:
             return pos
