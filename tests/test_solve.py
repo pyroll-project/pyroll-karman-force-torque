@@ -8,8 +8,8 @@ from pyroll.core import Profile, PassSequence, RollPass, Roll, CircularOvalGroov
 def test_solve(tmp_path: Path, caplog):
     caplog.set_level(logging.INFO, logger="pyroll")
 
-    import pyroll.karman_power_and_labour
     import pyroll.freiberg_flow_stress
+    import pyroll.karman_power_and_labour
 
     in_profile = Profile.round(
         diameter=30e-3,
@@ -31,9 +31,9 @@ def test_solve(tmp_path: Path, caplog):
                 rotational_frequency=1
             ),
             gap=2e-3,
-            coulomb_friction_coefficient=0.25,
-            mean_back_tension=0,
-            mean_front_tension=6e6,
+            coulomb_friction_coefficient=0.35,
+            back_tension=0,
+            front_tension=6e6,
 
         ),
         Transport(
@@ -52,9 +52,9 @@ def test_solve(tmp_path: Path, caplog):
                 rotational_frequency=1
             ),
             gap=2e-3,
-            coulomb_friction_coefficient=0.25,
-            mean_back_tension=6e6,
-            mean_front_tension=0,
+            coulomb_friction_coefficient=0.35,
+            back_tension=6e6,
+            front_tension=0,
 
         ),
     ])

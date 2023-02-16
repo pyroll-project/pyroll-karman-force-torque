@@ -16,16 +16,16 @@ def coulomb_friction_coefficient(self: RollPassExt):
         "You must provide Coulomb's friction coefficient to use the pyroll-karman-power-and-labour plugin.")
 
 
-@RollPass.mean_front_tension
-def mean_front_tension(self: RollPass):
+@RollPass.front_tension
+def front_tension(self: RollPass):
     raise ValueError(
-        "You must provide a mean front tension to use the pyroll-karman-power-and-labour plugin.")
+        "You must provide a front tension to use the pyroll-karman-power-and-labour plugin.")
 
 
-@RollPass.mean_back_tension
-def mean_back_tension(self: RollPass):
+@RollPass.back_tension
+def back_tension(self: RollPass):
     raise ValueError(
-        "You must provide a mean back tension to use the pyroll-karman-power-and-labour plugin.")
+        "You must provide a back tension to use the pyroll-karman-power-and-labour plugin.")
 
 
 @RollPassExt.karman_solution
@@ -48,9 +48,9 @@ def roll_force(self: RollPass):
     return (self.karman_solution.roll_force_per_unit_width * self.roll.contact_area) / self.roll.contact_length
 
 
-@RollPass.mean_neutral_plane_position
-def mean_neutral_plane_position(self: RollPass):
-    return self.karman_solution.neutral_plane_position
+@RollPass.Roll.neutral_point
+def neutral_point(self: RollPass.Roll):
+    return self.roll_pass.karman_solution.neutral_plane_position
 
 
 @RollPass.Roll.roll_torque

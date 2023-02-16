@@ -65,12 +65,12 @@ class KarmanSolver:
         if solution_direction is "forward":
             start_position = self.entry_position
             exit_position = self.exit_position
-            horizontal_stress = self.roll_pass.mean_back_tension
+            horizontal_stress = self.roll_pass.back_tension
             direction = 1
         elif solution_direction is "backward":
             start_position = self.exit_position
             exit_position = self.entry_position
-            horizontal_stress = self.roll_pass.mean_front_tension
+            horizontal_stress = self.roll_pass.front_tension
             direction = -1
 
         position = start_position
@@ -86,17 +86,18 @@ class KarmanSolver:
                                                                          temperature=self.roll_pass.in_profile.temperature)
             vertical_stress = horizontal_stress - 2 / np.sqrt(3) * flow_stress
             normal_pressure = - vertical_stress / (
-                        1 + self.roll_pass.coulomb_friction_coefficient * np.tan(roll_angle) * direction)
+                    1 + self.roll_pass.coulomb_friction_coefficient * np.tan(roll_angle) * direction)
 
             shear_stress = self.roll_pass.coulomb_friction_coefficient * normal_pressure * direction
 
             stepwise_solution_storage[position] = (
-            {"horizontal_stress": horizontal_stress, "vertical_stress": vertical_stress, "shear_stress": shear_stress,
-             "normal_pressure": normal_pressure, "flow_stress": flow_stress})
+                {"horizontal_stress": horizontal_stress, "vertical_stress": vertical_stress,
+                 "shear_stress": shear_stress,
+                 "normal_pressure": normal_pressure, "flow_stress": flow_stress})
 
             horizontal_stress_change = - (
-                        horizontal_stress * height_derivate + 2 * shear_stress - 2 * normal_pressure * np.tan(
-                    roll_angle)) / self.equivalent_roll_gap_height(position)
+                    horizontal_stress * height_derivate + 2 * shear_stress - 2 * normal_pressure * np.tan(
+                roll_angle)) / self.equivalent_roll_gap_height(position)
             horizontal_stress += horizontal_stress_change * step_width_with_direction
             position += step_width_with_direction
 
