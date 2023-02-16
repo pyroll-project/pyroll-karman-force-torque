@@ -33,7 +33,7 @@ def test_solve(tmp_path: Path, caplog):
             gap=2e-3,
             coulomb_friction_coefficient=0.25,
             mean_back_tension=0,
-            mean_front_tension=5e6,
+            mean_front_tension=6e6,
 
         ),
         Transport(
@@ -53,7 +53,7 @@ def test_solve(tmp_path: Path, caplog):
             ),
             gap=2e-3,
             coulomb_friction_coefficient=0.25,
-            mean_back_tension=5e6,
+            mean_back_tension=6e6,
             mean_front_tension=0,
 
         ),

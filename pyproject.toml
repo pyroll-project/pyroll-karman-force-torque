@@ -6,10 +6,10 @@ authors = [
 ]
 license = "BSD-3-Clause"
 homepage = "https://pyroll-project.github.io/"
-repository = "https://github.com/pyroll-project/pyroll-alexander-power-and-labour"
-documentation = "https://github.com/pyroll-project/pyroll-alexander-power-and-labour/blob/main/docs/docs.pdf"
+repository = "https://github.com/pyroll-project/pyroll-karman-power-and-labour"
+documentation = "https://github.com/pyroll-project/pyroll-karman-power-and-labour/blob/main/docs/docs.pdf"
 packages = [
-    { include = "pyroll/alexander_power_and_labour" }
+    { include = "pyroll/karman_power_and_labour" }
 ]
 readme = "README.md"
 classifiers = [
