@@ -2,62 +2,56 @@ import logging
 import webbrowser
 from pathlib import Path
 
-from pyroll.core import Profile, PassSequence, RollPass, Roll, CircularOvalGroove, Transport, RoundGroove
+import numpy as np
+import pyroll.report.config
+from pyroll.core import Profile, PassSequence, RollPass, Roll, CircularOvalGroove
+
+DISK_ELEMENT_COUNT = 30
+pyroll.report.config.Config.PRINT_DISK_ELEMENTS = True
 
 
 def test_solve(tmp_path: Path, caplog):
     caplog.set_level(logging.INFO, logger="pyroll")
 
     import pyroll.freiberg_flow_stress
+    import pyroll.interface_friction
+    import pyroll.pillar_model
+    import pyroll.local_velocity
     import pyroll.karman_power_and_labour
 
     in_profile = Profile.round(
-        diameter=30e-3,
+        diameter=19.5e-3,
         temperature=1200 + 273.15,
         strain=0,
+        pillar_strains = np.zeros(pyroll.pillar_model.Config.PILLAR_COUNT),
         material=["C45", "steel"],
+        density=7.5e3,
+        specific_heat_capacity=690,
     )
 
-    sequence = PassSequence([
-        RollPass(
-            label="Oval I",
-            roll=Roll(
-                groove=CircularOvalGroove(
-                    depth=8e-3,
-                    r1=6e-3,
-                    r2=40e-3
+    sequence = PassSequence(
+        [
+            RollPass(
+                label="Oval",
+                roll=Roll(
+                    groove=CircularOvalGroove(
+                        depth=5e-3,
+                        r1=0.2e-3,
+                        r2=16e-3,
+                    ),
+                    nominal_radius=160e-3,
+                    rotational_frequency=1,
+                    neutral_point=-20e-3
                 ),
-                nominal_radius=160e-3,
-                rotational_frequency=1
+                gap=4e-3,
+                back_tension=0,
+                front_tension=0,
+                disk_element_count=DISK_ELEMENT_COUNT,
+                friction_factor=0.8
             ),
-            gap=2e-3,
-            coulomb_friction_coefficient=0.35,
-            back_tension=0,
-            front_tension=6e6,
 
-        ),
-        Transport(
-            label="I => II",
-            duration=1
-        ),
-        RollPass(
-            label="Round II",
-            roll=Roll(
-                groove=RoundGroove(
-                    r1=1e-3,
-                    r2=12.5e-3,
-                    depth=11.5e-3
-                ),
-                nominal_radius=160e-3,
-                rotational_frequency=1
-            ),
-            gap=2e-3,
-            coulomb_friction_coefficient=0.35,
-            back_tension=6e6,
-            front_tension=0,
-
-        ),
-    ])
+        ]
+    )
 
     try:
         sequence.solve(in_profile)

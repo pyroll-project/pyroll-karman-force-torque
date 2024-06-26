@@ -9,7 +9,7 @@ homepage = "https://pyroll-project.github.io/"
 repository = "https://github.com/pyroll-project/pyroll-karman-power-and-labour"
 documentation = "https://github.com/pyroll-project/pyroll-karman-power-and-labour/blob/main/docs/docs.pdf"
 packages = [
-    { include = "pyroll/equivalent-karman-model" }
+    { include = "pyroll/karman_power_and_labour" }
 ]
 readme = "README.md"
 classifiers = [
@@ -21,8 +21,10 @@ classifiers = [
 
 requires-python = ">=3.9, <4.0"
 dependencies = [
-    "pyroll-core ~= 2.1.0",
+    "pyroll-core ~= 2.1",
     "pyroll-interface-friction~=2.0",
+    "pyroll-pillar-model @ {root:uri}/pyroll_pillar_model-2.1.7-py3-none-any.whl",
+    "pyroll-local-velocity @ {root:uri}/pyroll_local_velocity-2.0.1-py3-none-any.whl"
 ]
 
 dynamic = ["version"]
@@ -30,3 +32,6 @@ dynamic = ["version"]
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+[tool.hatch.metadata]
+allow-direct-references = true
