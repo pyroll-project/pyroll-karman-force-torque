@@ -1,6 +1,6 @@
 [project]
 name = "pyroll-karman-power-and-labour"
-description = "Plugin for PyRoll providing the power and labour model solving the von-Karman equation."
+description = "Plugin for PyRoll providing a solution of von-Karmans ODE using the equivalent pass."
 authors = [
     { name = "Christoph Renzing", email = "christoph.renzing@imf.tu-freiberg.de" }
 ]
@@ -9,7 +9,7 @@ homepage = "https://pyroll-project.github.io/"
 repository = "https://github.com/pyroll-project/pyroll-karman-power-and-labour"
 documentation = "https://github.com/pyroll-project/pyroll-karman-power-and-labour/blob/main/docs/docs.pdf"
 packages = [
-    { include = "pyroll/karman_power_and_labour" }
+    { include = "pyroll/equivalent-karman-model" }
 ]
 readme = "README.md"
 classifiers = [
@@ -21,8 +21,8 @@ classifiers = [
 
 requires-python = ">=3.9, <4.0"
 dependencies = [
-    "pyroll-core ~= 2.0.0",
-    "pandas ~=1.5.3"
+    "pyroll-core ~= 2.1.0",
+    "pyroll-interface-friction~=2.0",
 ]
 
 dynamic = ["version"]
