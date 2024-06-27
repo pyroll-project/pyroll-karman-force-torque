@@ -3,11 +3,10 @@ import webbrowser
 from pathlib import Path
 
 import numpy as np
-import pyroll.report.config
+
 from pyroll.core import Profile, PassSequence, RollPass, Roll, CircularOvalGroove
 
-DISK_ELEMENT_COUNT = 30
-pyroll.report.config.Config.PRINT_DISK_ELEMENTS = True
+DISK_ELEMENT_COUNT = 50
 
 
 def test_solve(tmp_path: Path, caplog):
@@ -23,7 +22,7 @@ def test_solve(tmp_path: Path, caplog):
         diameter=19.5e-3,
         temperature=1200 + 273.15,
         strain=0,
-        pillar_strains = np.zeros(pyroll.pillar_model.Config.PILLAR_COUNT),
+        pillar_strains=np.zeros(pyroll.pillar_model.Config.PILLAR_COUNT),
         material=["C45", "steel"],
         density=7.5e3,
         specific_heat_capacity=690,

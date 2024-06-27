@@ -23,8 +23,10 @@ requires-python = ">=3.9, <4.0"
 dependencies = [
     "pyroll-core ~= 2.1",
     "pyroll-interface-friction~=2.0",
-    "pyroll-pillar-model @ {root:uri}/pyroll_pillar_model-2.1.7-py3-none-any.whl",
-    "pyroll-local-velocity @ {root:uri}/pyroll_local_velocity-2.0.1-py3-none-any.whl"
+    "pyroll-pillar-model~=2.1",
+    "pyroll-local-velocity~=2.0",
+    "pandas",
+    "tabulate"
 ]
 
 dynamic = ["version"]
