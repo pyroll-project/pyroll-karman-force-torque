@@ -4,14 +4,15 @@ packages = [
 ]
 
 [version]
-path = "pyroll/karman_power_and_labour/__init__.py"
+path = "pyroll/karman_force_torque/__init__.py"
 
 [envs.default]
 path = ".venv"
 dependencies = [
     "pytest ~= 7.0",
-    "pyroll-report ~= 2.0.0b",
-    "pyroll-freiberg-flow-stress ~= 2.0.0b1"
+    "pyroll-report",
+    "pyroll-freiberg-flow-stress",
+    "pyroll-interface-friction"
 ]
 
 

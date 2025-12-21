@@ -9,7 +9,7 @@ def test_solve(tmp_path: Path, caplog):
     caplog.set_level(logging.INFO, logger="pyroll")
 
     import pyroll.freiberg_flow_stress
-    import pyroll.karman_power_and_labour
+    import pyroll.karman_force_torque
 
     in_profile = Profile.round(
         diameter=30e-3,
