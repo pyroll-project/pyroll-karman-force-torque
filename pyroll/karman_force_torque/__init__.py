@@ -1,7 +1,7 @@
 from . import roll_pass
 from . import report
 
-VERSION = "3.0.0a"
+VERSION = "3.0.0a1"
 
 
 import importlib.util
